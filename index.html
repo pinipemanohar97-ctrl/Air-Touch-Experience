@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AIR-TOUCH | MASTERPIECE</title>
+    <title>AIR-TOUCH | FINAL</title>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        
-        /* Sci-Fi Interface */
         #interface { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; border: 2px solid rgba(0, 229, 255, 0.2); box-sizing: border-box; display: none; }
         #header { position: absolute; top: 20px; width: 100%; text-align: center; color: #00e5ff; }
         .glitch-title { font-size: 2.2rem; font-weight: 900; letter-spacing: 12px; margin: 0; text-shadow: 0 0 15px #00e5ff; }
-        #status { margin-top: 10px; font-weight: bold; font-family: monospace; }
+        #status { margin-top: 10px; font-weight: bold; font-family: monospace; font-size: 0.9rem; }
         #data-stream { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #00e5ff; font-family: monospace; font-size: 0.6rem; line-height: 1.8; opacity: 0.6; }
         #footer { position: absolute; bottom: 20px; width: 100%; text-align: center; color: #fff; font-size: 0.7rem; opacity: 0.5; letter-spacing: 2px; }
 
@@ -22,7 +20,6 @@
         }
         #skeleton-canvas { width: 100%; height: 100%; transform: scaleX(-1); }
 
-        /* The First-Click Start Screen */
         #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 100; display: flex; flex-direction: column;
@@ -49,10 +46,10 @@
         <div id="header">
             <div style="font-size: 0.5rem; letter-spacing: 4px; opacity: 0.8;">DEPARTMENT OF AI & DATA SCIENCE</div>
             <h1 class="glitch-title">AIR-TOUCH</h1>
-            <div id="status">[ SEARCHING FOR TARGET ]</div>
+            <div id="status">[ INITIALIZING SENSORS ]</div>
         </div>
         <div id="data-stream">
-            LATENCY: 12ms<br>MODE: TORUS_KNOT<br>GEOMETRY: QUANTUM<br>STREAM: ENCRYPTED<br>USER_LINK: ACTIVE
+            LATENCY: 12ms<br>SENSORS: INDEX_ANCHOR<br>TRIGGER: THUMB_MIDDLE<br>STREAM: ENCRYPTED<br>USER_LINK: ACTIVE
         </div>
         <div id="footer">Aditya Degree College | Vizianagaram</div>
     </div>
@@ -69,13 +66,13 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // 1. THE ART: TORUS KNOT
+        // THE ART: TORUS KNOT
         const knotGeom = new THREE.TorusKnotGeometry(0.6, 0.18, 120, 18);
         const knotMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, wireframe: true });
         const core = new THREE.Mesh(knotGeom, knotMat);
         scene.add(core);
 
-        // 2. THE COSMIC DUST
+        // THE COSMIC DUST
         const pCount = 6000;
         const pGeom = new THREE.BufferGeometry();
         const pPos = new Float32Array(pCount * 3);
@@ -98,12 +95,10 @@
         let currentExplode = 1;
         let targetExplode = 1;
 
-        // Skeleton Monitoring Setup
         const canvasElement = document.getElementById('skeleton-canvas');
         const canvasCtx = canvasElement.getContext('2d');
 
         function onResults(results) {
-            // Visual Hand Confirmation
             canvasCtx.save();
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             if (results.multiHandLandmarks) {
@@ -117,19 +112,23 @@
             const statusTxt = document.getElementById('status');
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const hand = results.multiHandLandmarks[0];
-                const d = Math.hypot(hand[4].x - hand[8].x, hand[4].y - hand[8].y);
+                
+                // CONTROL CHANGE: Distance between Thumb(4) and Middle Finger(12)
+                const triggerDist = Math.hypot(hand[4].x - hand[12].x, hand[4].y - hand[12].y);
+                
+                // ROTATION CHANGE: Tethered to Index Finger(8)
+                scene.rotation.y = hand[8].x * 5;
+                scene.rotation.x = hand[8].y * 3;
 
-                if (d < 0.07) {
+                if (triggerDist < 0.08) {
                     targetExplode = 0.4;
                     statusTxt.innerText = "[ CORE COMPRESSED ]";
                     statusTxt.style.color = "#00ff88";
                 } else {
-                    targetExplode = d * 12;
-                    statusTxt.innerText = "[ CORE RADIATING ]";
+                    targetExplode = triggerDist * 10;
+                    statusTxt.innerText = "[ MIDDLE-THUMB TRIGGER ACTIVE ]";
                     statusTxt.style.color = "#ff3300";
                 }
-                scene.rotation.y = hand[8].x * 5;
-                scene.rotation.x = hand[8].y * 3;
             } else {
                 statusTxt.innerText = "[ SCANNING FOR NEURAL SIGNATURE ]";
                 statusTxt.style.color = "#00e5ff";
@@ -146,6 +145,8 @@
             hands.onResults(onResults);
 
             const video = document.createElement('video');
+            video.setAttribute('playsinline', ''); 
+            
             const cam = new Camera(video, {
                 onFrame: async () => { await hands.send({image: video}); },
                 width: 640, height: 480
@@ -158,8 +159,7 @@
             currentExplode += (targetExplode - currentExplode) * 0.15;
             core.scale.set(currentExplode, currentExplode, currentExplode);
             core.rotation.y += 0.01;
-            core.rotation.z += 0.005;
-
+            
             const pos = pGeom.attributes.position.array;
             for (let i = 0; i < pCount; i++) {
                 pos[i*3] = pOriginal[i*3] * currentExplode;
