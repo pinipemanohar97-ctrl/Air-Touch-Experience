@@ -5,64 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AIR-TOUCH | Aditya Degree College Vizianagaram</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #canvas-container { position: absolute; width: 100%; height: 100%; }
-        
-        /* The Professional HUD */
+        body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; }
         #ui-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #00e5ff;
-            text-align: center;
-            pointer-events: none;
-            text-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
-            z-index: 10;
+            position: absolute; top: 10%; width: 100%; text-align: center;
+            color: #00e5ff; pointer-events: none; z-index: 10;
         }
-
-        .college-name { font-size: 1.1rem; color: #fff; letter-spacing: 3px; margin-bottom: 10px; opacity: 0.9; }
-        .dept-name { font-size: 0.9rem; color: #aaa; margin-bottom: 30px; font-weight: 300; }
-        .project-title { font-size: 3.5rem; font-weight: 800; letter-spacing: 8px; margin: 10px 0; }
-        .loading-text { font-size: 1.2rem; margin-top: 20px; animation: pulse 2s infinite; }
-        .instruction { font-size: 0.9rem; color: #888; margin-top: 5px; font-style: italic; }
-        
-        /* The Return Gift Footer */
         #footer-thanks {
-            position: fixed;
-            bottom: 15px;
-            width: 100%;
-            text-align: center;
-            color: rgba(255,255,255,0.6);
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            z-index: 10;
+            position: fixed; bottom: 15px; width: 100%; text-align: center;
+            color: rgba(255,255,255,0.6); font-size: 0.8rem; z-index: 10;
         }
-
-        @keyframes pulse {
-            0% { opacity: 0.4; }
-            50% { opacity: 1; }
-            100% { opacity: 0.4; }
-        }
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
-    <div id="canvas-container"></div>
-
     <div id="ui-overlay">
-        <div class="college-name">ADITYA DEGREE COLLEGE, VIZIANAGARAM</div>
-        <div class="dept-name">DEPT. OF ARTIFICIAL INTELLIGENCE & DATA SCIENCE</div>
-        
-        <div class="project-title">AIR-TOUCH</div>
-        
-        <div id="status" class="loading-text">INITIALIZING NEURAL ENGINE...</div>
-        <p id="sub-status" class="instruction">Please allow camera access for gesture control</p>
+        <div style="letter-spacing: 3px; font-size: 0.8rem;">ADITYA DEGREE COLLEGE, VIZIANAGARAM</div>
+        <h1 style="letter-spacing: 8px; margin: 5px 0;">AIR-TOUCH</h1>
+        <div id="status" style="color: #00ff88;">AI NEURAL ENGINE ACTIVE</div>
+        <p id="gesture-hint" style="color: #888; font-size: 0.7rem;">Pinch fingers to Assemble | Open hand to Explode</p>
     </div>
 
     <div id="footer-thanks">
         Thank you for visiting the AIR-TOUCH Exhibit. <br>
-        A Multi-Modal AI System presented by Aditya Degree College.
+        AI & Data Science Project
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -70,20 +36,70 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
     <script>
-        console.log("AIR-TOUCH Live Experience Active...");
-        
-        // Simulation of the AI System initialization
-        setTimeout(() => {
-            const statusEl = document.getElementById('status');
-            if(statusEl) {
-                statusEl.innerText = "SYSTEM READY: AWAITING GESTURES";
-                statusEl.style.color = "#00ff88"; // Ready Green
+        // --- SATURN PHYSICS ENGINE ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create Saturn Particles
+        const geometry = new THREE.SphereGeometry(1, 64, 64);
+        const material = new THREE.PointsMaterial({ color: 0x00e5ff, size: 0.02 });
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        camera.position.z = 3;
+
+        // --- GESTURE LOGIC ---
+        function handleGestures(landmarks) {
+            const thumb = landmarks[4];
+            const index = landmarks[8];
+            const middle = landmarks[12];
+
+            // 1. ROTATION (Index Finger Position)
+            particles.rotation.y = index.x * 5;
+            particles.rotation.x = index.y * 5;
+
+            // 2. PINCH vs EXPLODE (Distance Calculation)
+            const dist = Math.sqrt(
+                Math.pow(thumb.x - index.x, 2) + 
+                Math.pow(thumb.y - index.y, 2)
+            );
+
+            if (dist < 0.05) {
+                // PINCH: Saturn stays together
+                particles.scale.set(1, 1, 1);
+                document.getElementById('status').innerText = "SYSTEM: ASSEMBLED";
+            } else if (dist > 0.2) {
+                // WIDE OPEN: Saturn explodes
+                particles.scale.set(dist * 5, dist * 5, dist * 5);
+                document.getElementById('status').innerText = "SYSTEM: EXPLODED";
             }
-            const subStatusEl = document.getElementById('sub-status');
-            if(subStatusEl) {
-                subStatusEl.innerText = "Interaction Active - Move your hand to move the Saturn particles";
+        }
+
+        // Initialize MediaPipe Hands
+        const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+        hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5 });
+        hands.onResults((results) => {
+            if (results.multiHandLandmarks.length > 0) {
+                handleGestures(results.multiHandLandmarks[0]);
             }
-        }, 3500);
+        });
+
+        // Setup Camera
+        const videoElement = document.createElement('video');
+        const camera_proc = new Camera(videoElement, {
+            onFrame: async () => { await hands.send({image: videoElement}); },
+            width: 1280, height: 720
+        });
+        camera_proc.start();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
     </script>
 </body>
 </html>
