@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIR-TOUCH | Aditya Degree College Vizianagaram</title>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #canvas-container { position: absolute; width: 100%; height: 100%; }
+        
+        /* The Professional HUD */
+        #ui-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00e5ff;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+            z-index: 10;
+        }
+
+        .college-name { font-size: 1.1rem; color: #fff; letter-spacing: 3px; margin-bottom: 10px; opacity: 0.9; }
+        .dept-name { font-size: 0.9rem; color: #aaa; margin-bottom: 30px; font-weight: 300; }
+        .project-title { font-size: 3.5rem; font-weight: 800; letter-spacing: 8px; margin: 10px 0; }
+        .loading-text { font-size: 1.2rem; margin-top: 20px; animation: pulse 2s infinite; }
+        .instruction { font-size: 0.9rem; color: #888; margin-top: 5px; font-style: italic; }
+        
+        /* The Return Gift Footer */
+        #footer-thanks {
+            position: fixed;
+            bottom: 15px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            z-index: 10;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui-overlay">
+        <div class="college-name">ADITYA DEGREE COLLEGE, VIZIANAGARAM</div>
+        <div class="dept-name">DEPT. OF ARTIFICIAL INTELLIGENCE & DATA SCIENCE</div>
+        
+        <div class="project-title">AIR-TOUCH</div>
+        
+        <div id="status" class="loading-text">INITIALIZING NEURAL ENGINE...</div>
+        <p id="sub-status" class="instruction">Please allow camera access for gesture control</p>
+    </div>
+
+    <div id="footer-thanks">
+        Thank you for visiting the AIR-TOUCH Exhibit. <br>
+        A Multi-Modal AI System presented by Aditya Degree College.
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+    <script>
+        console.log("AIR-TOUCH Live Experience Active...");
+        
+        // Simulation of the AI System initialization
+        setTimeout(() => {
+            const statusEl = document.getElementById('status');
+            if(statusEl) {
+                statusEl.innerText = "SYSTEM READY: AWAITING GESTURES";
+                statusEl.style.color = "#00ff88"; // Ready Green
+            }
+            const subStatusEl = document.getElementById('sub-status');
+            if(subStatusEl) {
+                subStatusEl.innerText = "Interaction Active - Move your hand to move the Saturn particles";
+            }
+        }, 3500);
+    </script>
+</body>
+</html>
