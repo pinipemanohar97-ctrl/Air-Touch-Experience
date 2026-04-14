@@ -2,33 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIR-TOUCH | Aditya Degree College Vizianagaram</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AIR-TOUCH | Aditya Degree College</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; }
-        #ui-overlay {
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+        #overlay {
             position: absolute; top: 10%; width: 100%; text-align: center;
-            color: #00e5ff; pointer-events: none; z-index: 10;
+            color: #00e5ff; pointer-events: none; z-index: 5;
+            text-shadow: 0 0 20px rgba(0, 229, 255, 0.8);
         }
-        #footer-thanks {
-            position: fixed; bottom: 15px; width: 100%; text-align: center;
-            color: rgba(255,255,255,0.6); font-size: 0.8rem; z-index: 10;
+        .title { font-size: 3rem; font-weight: 900; letter-spacing: 12px; margin: 0; }
+        .college { font-size: 0.8rem; letter-spacing: 4px; color: #fff; opacity: 0.7; }
+        #status { font-size: 1rem; margin-top: 10px; font-weight: bold; transition: 0.3s; }
+        #footer {
+            position: fixed; bottom: 20px; width: 100%; text-align: center;
+            color: #ffffff99; font-size: 0.7rem; z-index: 5;
         }
-        canvas { display: block; }
     </style>
 </head>
 <body>
 
-    <div id="ui-overlay">
-        <div style="letter-spacing: 3px; font-size: 0.8rem;">ADITYA DEGREE COLLEGE, VIZIANAGARAM</div>
-        <h1 style="letter-spacing: 8px; margin: 5px 0;">AIR-TOUCH</h1>
-        <div id="status" style="color: #00ff88;">AI NEURAL ENGINE ACTIVE</div>
-        <p id="gesture-hint" style="color: #888; font-size: 0.7rem;">Pinch fingers to Assemble | Open hand to Explode</p>
+    <div id="overlay">
+        <div class="college">ADITYA DEGREE COLLEGE | VIZIANAGARAM</div>
+        <h1 class="title">AIR-TOUCH</h1>
+        <div id="status">INITIALIZING NEURAL ENGINE...</div>
     </div>
 
-    <div id="footer-thanks">
-        Thank you for visiting the AIR-TOUCH Exhibit. <br>
-        AI & Data Science Project
+    <div id="footer">
+        A Multi-Modal AI Experience by the Dept. of AI & Data Science <br>
+        Thank you for visiting our 2026 University Presentation.
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -36,67 +38,92 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
     <script>
-        // --- SATURN PHYSICS ENGINE ---
+        // --- 3D PARTICLE ENGINE ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Create Saturn Particles
-        const geometry = new THREE.SphereGeometry(1, 64, 64);
-        const material = new THREE.PointsMaterial({ color: 0x00e5ff, size: 0.02 });
-        const particles = new THREE.Points(geometry, material);
-        scene.add(particles);
+        // Create Particle Cloud
+        const particleCount = 5000;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const originalPositions = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos((Math.random() * 2) - 1);
+            positions[i*3] = Math.sin(phi) * Math.cos(theta);
+            positions[i*3+1] = Math.sin(phi) * Math.sin(theta);
+            positions[i*3+2] = Math.cos(phi);
+            originalPositions.set([positions[i*3], positions[i*3+1], positions[i*3+2]], i*3);
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const material = new THREE.PointsMaterial({ color: 0x00e5ff, size: 0.015, transparent: true });
+        const points = new THREE.Points(geometry, material);
+        scene.add(points);
 
         camera.position.z = 3;
 
-        // --- GESTURE LOGIC ---
-        function handleGestures(landmarks) {
-            const thumb = landmarks[4];
-            const index = landmarks[8];
-            const middle = landmarks[12];
+        // --- BUTTERY SMOOTH GESTURE LOGIC ---
+        let targetExplosion = 1;
+        let currentExplosion = 1;
+        let targetColor = new THREE.Color(0x00e5ff);
 
-            // 1. ROTATION (Index Finger Position)
-            particles.rotation.y = index.x * 5;
-            particles.rotation.x = index.y * 5;
+        function onResults(results) {
+            if (results.multiHandLandmarks.length > 0) {
+                const hand = results.multiHandLandmarks[0];
+                const thumb = hand[4];
+                const index = hand[8];
+                const middle = hand[12];
 
-            // 2. PINCH vs EXPLODE (Distance Calculation)
-            const dist = Math.sqrt(
-                Math.pow(thumb.x - index.x, 2) + 
-                Math.pow(thumb.y - index.y, 2)
-            );
+                // Rotate based on index
+                points.rotation.y = index.x * 6;
+                points.rotation.x = index.y * 6;
 
-            if (dist < 0.05) {
-                // PINCH: Saturn stays together
-                particles.scale.set(1, 1, 1);
-                document.getElementById('status').innerText = "SYSTEM: ASSEMBLED";
-            } else if (dist > 0.2) {
-                // WIDE OPEN: Saturn explodes
-                particles.scale.set(dist * 5, dist * 5, dist * 5);
-                document.getElementById('status').innerText = "SYSTEM: EXPLODED";
+                // Logic: Pinch = Assemble, Open = Explode
+                const dist = Math.sqrt(Math.pow(thumb.x - index.x, 2) + Math.pow(thumb.y - index.y, 2));
+                
+                if (dist < 0.08) {
+                    targetExplosion = 1.0;
+                    targetColor.set(0x00ffcc);
+                    document.getElementById('status').innerText = "SYSTEM: ASSEMBLED";
+                } else {
+                    targetExplosion = dist * 10;
+                    targetColor.set(0xff3300);
+                    document.getElementById('status').innerText = "SYSTEM: EXPLODED";
+                }
             }
         }
 
-        // Initialize MediaPipe Hands
         const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
         hands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.5 });
-        hands.onResults((results) => {
-            if (results.multiHandLandmarks.length > 0) {
-                handleGestures(results.multiHandLandmarks[0]);
-            }
-        });
+        hands.onResults(onResults);
 
-        // Setup Camera
         const videoElement = document.createElement('video');
         const camera_proc = new Camera(videoElement, {
             onFrame: async () => { await hands.send({image: videoElement}); },
-            width: 1280, height: 720
+            width: 640, height: 480
         });
         camera_proc.start();
 
+        // --- ANIMATION FRAME ---
         function animate() {
             requestAnimationFrame(animate);
+            
+            // Smoothen the movement (Lerp)
+            currentExplosion += (targetExplosion - currentExplosion) * 0.1;
+            points.material.color.lerp(targetColor, 0.1);
+
+            const posAttr = points.geometry.attributes.position;
+            for (let i = 0; i < particleCount; i++) {
+                posAttr.array[i*3] = originalPositions[i*3] * currentExplosion;
+                posAttr.array[i*3+1] = originalPositions[i*3+1] * currentExplosion;
+                posAttr.array[i*3+2] = originalPositions[i*3+2] * currentExplosion;
+            }
+            posAttr.needsUpdate = true;
+
             renderer.render(scene, camera);
         }
         animate();
