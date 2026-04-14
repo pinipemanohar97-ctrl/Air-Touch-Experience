@@ -3,30 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AIR-TOUCH | FINAL</title>
+    <title>AIR-TOUCH | SATURN EDITION</title>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
         #interface { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 10; border: 2px solid rgba(0, 229, 255, 0.2); box-sizing: border-box; display: none; }
-        #header { position: absolute; top: 20px; width: 100%; text-align: center; color: #00e5ff; }
-        .glitch-title { font-size: 2.2rem; font-weight: 900; letter-spacing: 12px; margin: 0; text-shadow: 0 0 15px #00e5ff; }
-        #status { margin-top: 10px; font-weight: bold; font-family: monospace; font-size: 0.9rem; }
-        #data-stream { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #00e5ff; font-family: monospace; font-size: 0.6rem; line-height: 1.8; opacity: 0.6; }
+        #header { position: absolute; top: 20px; width: 100%; text-align: center; color: #ffcc00; }
+        .glitch-title { font-size: 2.2rem; font-weight: 900; letter-spacing: 12px; margin: 0; text-shadow: 0 0 15px #ffcc00; }
+        #status { margin-top: 10px; font-weight: bold; font-family: monospace; font-size: 0.9rem; color: #ffcc00; }
+        #data-stream { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #ffcc00; font-family: monospace; font-size: 0.6rem; line-height: 1.8; opacity: 0.6; }
         #footer { position: absolute; bottom: 20px; width: 100%; text-align: center; color: #fff; font-size: 0.7rem; opacity: 0.5; letter-spacing: 2px; }
-
-        /* Neural Skeleton Monitor */
-        #monitor-container {
-            position: absolute; bottom: 70px; right: 20px; width: 120px; height: 90px;
-            border: 1px solid #00e5ff; background: rgba(0,0,0,0.8); overflow: hidden; display: none; z-index: 20;
-        }
+        #monitor-container { position: absolute; bottom: 70px; right: 20px; width: 120px; height: 90px; border: 1px solid #ffcc00; background: rgba(0,0,0,0.8); overflow: hidden; display: none; z-index: 20; }
         #skeleton-canvas { width: 100%; height: 100%; transform: scaleX(-1); }
-
-        #start-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 100; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; cursor: pointer;
-        }
-        #start-box { border: 1px solid #00e5ff; padding: 40px; text-align: center; background: rgba(0, 229, 255, 0.02); }
-        .blink { animation: blinker 1.5s linear infinite; color: #00e5ff; font-weight: bold; letter-spacing: 3px; font-family: monospace; }
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
+        #start-box { border: 1px solid #ffcc00; padding: 40px; text-align: center; background: rgba(255, 204, 0, 0.05); }
+        .blink { animation: blinker 1.5s linear infinite; color: #ffcc00; font-weight: bold; letter-spacing: 3px; font-family: monospace; }
         @keyframes blinker { 50% { opacity: 0; } }
     </style>
 </head>
@@ -34,9 +24,9 @@
 
     <div id="start-screen" onclick="launchExperience()">
         <div id="start-box">
-            <div style="color: #00e5ff; font-size: 0.6rem; margin-bottom: 20px; font-family: monospace;">STATION: VIZIANAGARAM // ADITYA COLLEGE</div>
-            <div class="blink">INITIALIZE NEURAL LINK</div>
-            <div style="color: #444; font-size: 0.5rem; margin-top: 20px; font-family: monospace;">[ TOUCH TO ESTABLISH CONNECTION ]</div>
+            <div style="color: #ffcc00; font-size: 0.6rem; margin-bottom: 20px; font-family: monospace;">STATION: VIZIANAGARAM // ADITYA COLLEGE</div>
+            <div class="blink">INITIALIZE SATURN CORE</div>
+            <div style="color: #666; font-size: 0.5rem; margin-top: 20px; font-family: monospace;">[ TOUCH TO ESTABLISH NEURAL LINK ]</div>
         </div>
     </div>
 
@@ -46,10 +36,10 @@
         <div id="header">
             <div style="font-size: 0.5rem; letter-spacing: 4px; opacity: 0.8;">DEPARTMENT OF AI & DATA SCIENCE</div>
             <h1 class="glitch-title">AIR-TOUCH</h1>
-            <div id="status">[ INITIALIZING SENSORS ]</div>
+            <div id="status">[ SCANNING ]</div>
         </div>
         <div id="data-stream">
-            LATENCY: 12ms<br>SENSORS: INDEX_ANCHOR<br>TRIGGER: THUMB_MIDDLE<br>STREAM: ENCRYPTED<br>USER_LINK: ACTIVE
+            OBJECT: SATURN_PRIME<br>PARTICLES: 15,000<br>ANCHOR: INDEX_FINGER<br>TRIGGER: THUMB_MIDDLE<br>STATUS: ENCRYPTED
         </div>
         <div id="footer">Aditya Degree College | Vizianagaram</div>
     </div>
@@ -66,35 +56,47 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // THE ART: TORUS KNOT
-        const knotGeom = new THREE.TorusKnotGeometry(0.6, 0.18, 120, 18);
-        const knotMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, wireframe: true });
-        const core = new THREE.Mesh(knotGeom, knotMat);
-        scene.add(core);
+        // 1. CREATE SATURN (Planet + Rings)
+        const saturnGroup = new THREE.Group();
+        
+        // Planet Core
+        const planetGeom = new THREE.SphereGeometry(0.7, 32, 32);
+        const planetMat = new THREE.MeshBasicMaterial({ color: 0xffcc00, wireframe: true });
+        const planet = new THREE.Mesh(planetGeom, planetMat);
+        saturnGroup.add(planet);
 
-        // THE COSMIC DUST
-        const pCount = 6000;
+        // Rings
+        const ringGeom = new THREE.TorusGeometry(1.1, 0.05, 2, 100);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xffcc00, wireframe: true });
+        const rings = new THREE.Mesh(ringGeom, ringMat);
+        rings.rotation.x = Math.PI / 2.5;
+        saturnGroup.add(rings);
+        
+        scene.add(saturnGroup);
+
+        // 2. 15,000 PARTICLES (Atmosphere)
+        const pCount = 15000;
         const pGeom = new THREE.BufferGeometry();
         const pPos = new Float32Array(pCount * 3);
         const pOriginal = new Float32Array(pCount * 3);
         for (let i = 0; i < pCount; i++) {
-            const r = 1.2 + Math.random() * 0.8;
+            const r = 1.5 + Math.random() * 2;
             const theta = Math.random() * Math.PI * 2;
-            pPos[i*3] = Math.cos(theta) * r;
-            pPos[i*3+1] = (Math.random() - 0.5) * 1.5;
-            pPos[i*3+2] = Math.sin(theta) * r;
+            const phi = Math.acos(2 * Math.random() - 1);
+            pPos[i*3] = r * Math.sin(phi) * Math.cos(theta);
+            pPos[i*3+1] = r * Math.sin(phi) * Math.sin(theta);
+            pPos[i*3+2] = r * Math.cos(phi);
             pOriginal.set([pPos[i*3], pPos[i*3+1], pPos[i*3+2]], i*3);
         }
         pGeom.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-        const pMat = new THREE.PointsMaterial({ size: 0.008, color: 0xffffff, transparent: true, opacity: 0.6 });
-        const dust = new THREE.Points(pGeom, pMat);
-        scene.add(dust);
+        const pMat = new THREE.PointsMaterial({ size: 0.005, color: 0xffffff, transparent: true, opacity: 0.4 });
+        const stars = new THREE.Points(pGeom, pMat);
+        scene.add(stars);
 
-        camera.position.z = 3.5;
+        camera.position.z = 4;
 
         let currentExplode = 1;
         let targetExplode = 1;
-
         const canvasElement = document.getElementById('skeleton-canvas');
         const canvasCtx = canvasElement.getContext('2d');
 
@@ -103,8 +105,7 @@
             canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
             if (results.multiHandLandmarks) {
                 for (const landmarks of results.multiHandLandmarks) {
-                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#00e5ff', lineWidth: 2});
-                    drawLandmarks(canvasCtx, landmarks, {color: '#ffffff', radius: 1});
+                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#ffcc00', lineWidth: 1});
                 }
             }
             canvasCtx.restore();
@@ -112,26 +113,23 @@
             const statusTxt = document.getElementById('status');
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const hand = results.multiHandLandmarks[0];
-                
-                // CONTROL CHANGE: Distance between Thumb(4) and Middle Finger(12)
                 const triggerDist = Math.hypot(hand[4].x - hand[12].x, hand[4].y - hand[12].y);
                 
-                // ROTATION CHANGE: Tethered to Index Finger(8)
-                scene.rotation.y = hand[8].x * 5;
-                scene.rotation.x = hand[8].y * 3;
+                // Index Finger Rotation (Mirrored)
+                saturnGroup.rotation.y = (0.5 - hand[8].x) * 6;
+                saturnGroup.rotation.x = (hand[8].y - 0.5) * 4;
 
                 if (triggerDist < 0.08) {
-                    targetExplode = 0.4;
-                    statusTxt.innerText = "[ CORE COMPRESSED ]";
-                    statusTxt.style.color = "#00ff88";
+                    targetExplode = 0.35;
+                    planetMat.color.setHex(0x00ff88); // THE COLOR FLIP: Neon Green
+                    ringMat.color.setHex(0x00ff88);
+                    statusTxt.innerText = "[ GRAVITY COLLAPSE: GREEN ]";
                 } else {
-                    targetExplode = triggerDist * 10;
-                    statusTxt.innerText = "[ MIDDLE-THUMB TRIGGER ACTIVE ]";
-                    statusTxt.style.color = "#ff3300";
+                    targetExplode = triggerDist * 8;
+                    planetMat.color.setHex(0xffcc00); // Back to Gold
+                    ringMat.color.setHex(0xffcc00);
+                    statusTxt.innerText = "[ EXPANDING NEBULA ]";
                 }
-            } else {
-                statusTxt.innerText = "[ SCANNING FOR NEURAL SIGNATURE ]";
-                statusTxt.style.color = "#00e5ff";
             }
         }
 
@@ -139,43 +137,30 @@
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('interface').style.display = 'block';
             document.getElementById('monitor-container').style.display = 'block';
-
             const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
             hands.setOptions({ maxNumHands: 1, modelComplexity: 0, minDetectionConfidence: 0.5 });
             hands.onResults(onResults);
-
             const video = document.createElement('video');
             video.setAttribute('playsinline', ''); 
-            
-            const cam = new Camera(video, {
-                onFrame: async () => { await hands.send({image: video}); },
-                width: 640, height: 480
-            });
+            const cam = new Camera(video, { onFrame: async () => { await hands.send({image: video}); }, width: 640, height: 480 });
             cam.start();
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            currentExplode += (targetExplode - currentExplode) * 0.15;
-            core.scale.set(currentExplode, currentExplode, currentExplode);
-            core.rotation.y += 0.01;
+            currentExplode += (targetExplode - currentExplode) * 0.12;
+            saturnGroup.scale.set(currentExplode, currentExplode, currentExplode);
             
             const pos = pGeom.attributes.position.array;
             for (let i = 0; i < pCount; i++) {
-                pos[i*3] = pOriginal[i*3] * currentExplode;
-                pos[i*3+1] = pOriginal[i*3+1] * currentExplode;
-                pos[i*3+2] = pOriginal[i*3+2] * currentExplode;
+                pos[i*3] = pOriginal[i*3] * (currentExplode * 1.5);
+                pos[i*3+1] = pOriginal[i*3+1] * (currentExplode * 1.5);
+                pos[i*3+2] = pOriginal[i*3+2] * (currentExplode * 1.5);
             }
             pGeom.attributes.position.needsUpdate = true;
             renderer.render(scene, camera);
         }
         animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
